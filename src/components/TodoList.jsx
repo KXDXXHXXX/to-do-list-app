@@ -1,7 +1,18 @@
-import React from 'react';
-import { Timer, Trash2, Check } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Timer, Trash2, Check, Pencil } from 'lucide-react';
 
-export default function TodoList({ todos, onToggle, onDelete, onStartTimer }) {
+export default function TodoList({ todos, onToggle, onDelete, onStartTimer, onUpdate }) {
+    const [editingId, setEditingId] = useState(null);
+    const [editText, setEditText] = useState("");
+    const inputRef = useRef(null);
+
+    // Focus input when editing starts
+    useEffect(() => {
+        if (editingId && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [editingId]);
+
     if (!todos || todos.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center p-12 text-slate-400 text-sm">
@@ -10,6 +21,26 @@ export default function TodoList({ todos, onToggle, onDelete, onStartTimer }) {
             </div>
         );
     }
+
+    const startEditing = (id, currentText) => {
+        setEditingId(id);
+        setEditText(currentText);
+    };
+
+    const submitEdit = (id) => {
+        if (editText.trim() !== "") {
+            onUpdate(id, editText.trim());
+        }
+        setEditingId(null);
+    };
+
+    const handleKeyDown = (e, id) => {
+        if (e.key === 'Enter') {
+            submitEdit(id);
+        } else if (e.key === 'Escape') {
+            setEditingId(null);
+        }
+    };
 
     return (
         <div className="flex flex-col gap-3 mt-4">
@@ -27,13 +58,27 @@ export default function TodoList({ todos, onToggle, onDelete, onStartTimer }) {
                         >
                             {todo.completed && <Check className="w-4 h-4" />}
                         </button>
-                        <div className={`flex flex-col overflow-hidden`}>
-                            <span
-                                className={`font-medium truncate transition-all ${todo.completed ? 'line-through text-slate-400' : ''}`}
-                                style={{ color: todo.completed ? undefined : todo.color }}
-                            >
-                                {todo.text}
-                            </span>
+
+                        <div className={`flex flex-col overflow-hidden flex-1 mr-4`}>
+                            {editingId === todo.id ? (
+                                <input
+                                    ref={inputRef}
+                                    type="text"
+                                    value={editText}
+                                    onChange={(e) => setEditText(e.target.value)}
+                                    onBlur={() => submitEdit(todo.id)}
+                                    onKeyDown={(e) => handleKeyDown(e, todo.id)}
+                                    className="font-medium bg-slate-50 text-slate-800 border border-indigo-300 rounded-md px-2 py-0.5 outline-none focus:ring-2 focus:ring-indigo-100 w-full"
+                                />
+                            ) : (
+                                <span
+                                    onDoubleClick={() => !todo.completed && startEditing(todo.id, todo.text)}
+                                    className={`font-medium truncate transition-all cursor-text ${todo.completed ? 'line-through text-slate-400' : ''}`}
+                                    style={{ color: todo.completed ? undefined : todo.color }}
+                                >
+                                    {todo.text}
+                                </span>
+                            )}
                             <div className="flex items-center mt-1">
                                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
                                     {todo.category}
@@ -42,7 +87,16 @@ export default function TodoList({ todos, onToggle, onDelete, onStartTimer }) {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
+                    <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity ml-2">
+                        {!todo.completed && editingId !== todo.id && (
+                            <button
+                                onClick={() => startEditing(todo.id, todo.text)}
+                                className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-colors"
+                                title="Edit Task"
+                            >
+                                <Pencil className="w-5 h-5" />
+                            </button>
+                        )}
                         <button
                             onClick={() => onStartTimer(todo.text)}
                             className="p-2 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"

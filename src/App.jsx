@@ -17,7 +17,11 @@ function App() {
   }, [todos, selectedDate]);
 
   const handleAddTodo = (newTodo) => {
-    setTodos(prev => [{ ...newTodo, date: selectedDate.toISOString() }, ...prev]);
+    setTodos(prev => [...prev, { ...newTodo, date: selectedDate.toISOString() }]);
+  };
+
+  const handleUpdateTodo = (id, newText) => {
+    setTodos(prev => prev.map(t => t.id === id ? { ...t, text: newText } : t));
   };
 
   const handleToggleTodo = (id) => {
@@ -75,6 +79,7 @@ function App() {
                 onToggle={handleToggleTodo}
                 onDelete={handleDeleteTodo}
                 onStartTimer={setActiveTask}
+                onUpdate={handleUpdateTodo}
               />
             </div>
           </div>
