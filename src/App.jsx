@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { isSameDay, format } from 'date-fns';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { arrayMove } from '@dnd-kit/sortable';
 import Calendar from './components/Calendar';
 import PomodoroTimer from './components/PomodoroTimer';
 import TodoForm from './components/TodoForm';
@@ -22,6 +23,17 @@ function App() {
 
   const handleUpdateTodo = (id, newText) => {
     setTodos(prev => prev.map(t => t.id === id ? { ...t, text: newText } : t));
+  };
+
+  const handleReorderTodos = (activeId, overId) => {
+    setTodos((prev) => {
+      const activeIndex = prev.findIndex((t) => t.id === activeId);
+      const overIndex = prev.findIndex((t) => t.id === overId);
+      if (activeIndex !== -1 && overIndex !== -1) {
+        return arrayMove(prev, activeIndex, overIndex);
+      }
+      return prev;
+    });
   };
 
   const handleToggleTodo = (id) => {
@@ -80,6 +92,7 @@ function App() {
                 onDelete={handleDeleteTodo}
                 onStartTimer={setActiveTask}
                 onUpdate={handleUpdateTodo}
+                onReorder={handleReorderTodos}
               />
             </div>
           </div>
