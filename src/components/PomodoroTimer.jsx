@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, Volume2, VolumeX, Coffee, Brain, Settings } from 'lucide-react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
-export default function PomodoroTimer({ activeTaskName = null }) {
+export default function PomodoroTimer({ activeTask = null }) {
     const [focusMinutes, setFocusMinutes] = useLocalStorage('pomodoro_focus_minutes', 25);
     const [breakMinutes, setBreakMinutes] = useLocalStorage('pomodoro_break_minutes', 5);
 
@@ -14,12 +14,16 @@ export default function PomodoroTimer({ activeTaskName = null }) {
 
     const audioCtxRef = useRef(null);
 
-    // Sync timeLeft if focusMinutes/breakMinutes change from another tab, 
-    // or on initial load. But we better handle it explicitly.
+    // Handle new activeTask start
     useEffect(() => {
-        // If not running, ensure initial timeLeft is correct when component mounts
-        // or if a user resets it. We don't forcefully overwrite if paused halfway.
-    }, []);
+        if (activeTask && activeTask.timestamp) {
+            const time = activeTask.focusTime || 25;
+            setFocusMinutes(time);
+            setTimeLeft(time * 60);
+            setIsBreak(false);
+            setIsRunning(true);
+        }
+    }, [activeTask?.timestamp]);
 
     useEffect(() => {
         let interval = null;
@@ -184,8 +188,10 @@ export default function PomodoroTimer({ activeTaskName = null }) {
                     {formatTime(timeLeft)}
                 </div>
                 <div className="min-h-[1.5rem] text-sm font-medium text-slate-600 flex items-center justify-center">
-                    {activeTaskName ? (
-                        <span className="bg-white/60 px-3 py-1 rounded-full shadow-sm max-w-full truncate">🎯 {activeTaskName}</span>
+                    {activeTask ? (
+                        <span className="bg-white/60 px-3 py-1 rounded-full shadow-sm max-w-full truncate flex items-center gap-1">
+                            <span className="text-xs">🎯</span> {activeTask.text || activeTask.name}
+                        </span>
                     ) : (
                         <span>Ready to focus?</span>
                     )}

@@ -25,6 +25,14 @@ function App() {
     setTodos(prev => prev.map(t => t.id === id ? { ...t, text: newText } : t));
   };
 
+  const handleUpdateCategory = (id, newCategory) => {
+    setTodos(prev => prev.map(t => t.id === id ? { ...t, category: newCategory } : t));
+  };
+
+  const handleUpdateFocusTime = (id, newTime) => {
+    setTodos(prev => prev.map(t => t.id === id ? { ...t, focusTime: parseInt(newTime, 10) || 25 } : t));
+  };
+
   const handleReorderTodos = (activeId, overId) => {
     setTodos((prev) => {
       const activeIndex = prev.findIndex((t) => t.id === activeId);
@@ -67,7 +75,7 @@ function App() {
                 selectedDate={selectedDate}
                 onSelectDate={setSelectedDate}
               />
-              <PomodoroTimer activeTaskName={activeTask} />
+              <PomodoroTimer activeTask={activeTask} />
             </div>
           </div>
 
@@ -90,8 +98,10 @@ function App() {
                 todos={filteredTodos}
                 onToggle={handleToggleTodo}
                 onDelete={handleDeleteTodo}
-                onStartTimer={setActiveTask}
+                onStartTimer={(todo) => setActiveTask({ ...todo, timestamp: Date.now() })}
                 onUpdate={handleUpdateTodo}
+                onUpdateCategory={handleUpdateCategory}
+                onUpdateFocusTime={handleUpdateFocusTime}
                 onReorder={handleReorderTodos}
               />
             </div>

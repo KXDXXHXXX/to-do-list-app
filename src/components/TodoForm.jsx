@@ -8,6 +8,7 @@ export default function TodoForm({ onAdd }) {
     const [text, setText] = useState('');
     const [category, setCategory] = useState('Personal');
     const [color, setColor] = useState(COLORS[6]); // Default blue
+    const [focusTime, setFocusTime] = useState(25); // Default 25 min
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -17,9 +18,11 @@ export default function TodoForm({ onAdd }) {
             text: text.trim(),
             category,
             color,
+            focusTime: parseInt(focusTime, 10) || 25,
             completed: false
         });
         setText('');
+        setFocusTime(25);
     };
 
     return (
@@ -53,6 +56,18 @@ export default function TodoForm({ onAdd }) {
                             <option key={cat} value={cat}>{cat}</option>
                         ))}
                     </select>
+                </div>
+
+                <div className="flex gap-2 items-center">
+                    <span className="text-xs font-medium text-slate-500 uppercase">Focus (min)</span>
+                    <input
+                        type="number"
+                        min="1"
+                        max="120"
+                        value={focusTime}
+                        onChange={(e) => setFocusTime(e.target.value)}
+                        className="w-14 bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-indigo-100 focus:border-indigo-400 outline-none p-1.5 text-center"
+                    />
                 </div>
 
                 <div className="flex gap-2 items-center">
